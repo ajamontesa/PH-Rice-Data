@@ -66,7 +66,7 @@ for (y in 1:(2021-1990)) {
             select(CommodityCode = `Commodity Code`, Country, Period, Imports_KG) %>%
             suppressMessages() %>% suppressWarnings()
     )
-    Sys.sleep(0.7)
+    Sys.sleep(1)
 }
 
 RiceImports %>% write_csv("Data/Openstat-Rice-Imports.csv")
@@ -133,7 +133,7 @@ for (y in c(1:3, 7:(2021-1990))) {
             select(CommodityCode = `Commodity Code`, Country, Period, Exports_KG) %>%
             suppressMessages() %>% suppressWarnings()
     )
-    Sys.sleep(0.7)
+    Sys.sleep(1)
 }
 
 RiceExports %>% write_csv("Data/Openstat-Rice-Exports.csv")

@@ -9,14 +9,26 @@ library(RcppRoll)
 ## Only run this section if the data in the Data/ folder are not updated.
 
 ## Updated Quarterly
-#source("Scripts/downloadProductivityData.R")
-#source("Scripts/downloadValueOfProductionData.R")
+if ((month(Sys.Date()) %in% c(2, 5, 8, 11)) & (mday(Sys.Date()) == 17)) {
+    source("Scripts/downloadProductivityData.R")
+    Sys.sleep(1)
+    source("Scripts/downloadValueOfProductionData.R")
+    Sys.sleep(1)
+}
+
 
 ## Updated Monthly
-#source("Scripts/downloadPriceData.R")
-#source("Scripts/downloadRiceInflationData.R")
-#source("Scripts/downloadRiceTradeData.R")
-#source("Scripts/downloadRiceStocks.R")
+if (mday(Sys.Date()) == 17) {
+    source("Scripts/downloadPriceData.R")
+    Sys.sleep(1)
+    source("Scripts/downloadRiceInflationData.R")
+    Sys.sleep(1)
+    source("Scripts/downloadRiceTradeData.R")
+    Sys.sleep(1)
+    source("Scripts/downloadStocksData.R")
+    Sys.sleep(1)
+}
+
 
 
 # Data Labels -------------------------------------------------------------
