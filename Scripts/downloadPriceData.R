@@ -39,6 +39,7 @@ for (i in 0:3) {
             content(encoding = "UTF-8") %>%
             suppressMessages() %>% suppressWarnings()
     )
+    Sys.sleep(0.5)
 }
 WSPrices %>% write_csv("Data/Openstat-Prices-Wholesale.csv")
 
@@ -60,6 +61,7 @@ for (i in 0:3) {
             content(encoding = "UTF-8") %>%
             suppressMessages() %>% suppressWarnings()
     )
+    Sys.sleep(0.5)
 }
 RetailOldPrices %>% write_csv("Data/Openstat-Prices-Retail-Old.csv")
 

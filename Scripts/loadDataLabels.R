@@ -100,7 +100,7 @@ GeoLabels <- tribble(
     "....City of Cotabato", "SOCCSKSARGEN", "Reg. XII", "City of Cotabato",
     "..REGION XIII (CARAGA)", "Caraga Region", "Reg. XIII", "Reg. XIII",
     "....Agusan del Norte", "Caraga Region", "Reg. XIII", "Agusan del Norte",
-    "....Agusan del Sur", "Caraga Region", "Reg. XIII", "Agusan del Norte",
+    "....Agusan del Sur", "Caraga Region", "Reg. XIII", "Agusan del Sur",
     "....Dinagat Islands", "Caraga Region", "Reg. XIII", "Dinagat Islands",
     "....Surigao del Norte", "Caraga Region", "Reg. XIII", "Surigao del Norte",
     "....Surigao del Sur", "Caraga Region", "Reg. XIII", "Surigao del Sur",
