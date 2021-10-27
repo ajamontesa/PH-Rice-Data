@@ -8,26 +8,7 @@ library(RcppRoll)
 # Download Rice Data ------------------------------------------------------
 ## Only run this section if the data in the Data/ folder are not updated.
 
-## Updated Quarterly
-if ((month(Sys.Date()) %in% c(2, 5, 8, 11)) & (mday(Sys.Date()) == 17)) {
-    source("Scripts/downloadProductivityData.R")
-    Sys.sleep(1)
-    source("Scripts/downloadValueOfProductionData.R")
-    Sys.sleep(1)
-}
-
-
-## Updated Monthly
-if (mday(Sys.Date()) == 17) {
-    source("Scripts/downloadPriceData.R")
-    Sys.sleep(1)
-    source("Scripts/downloadRiceInflationData.R")
-    Sys.sleep(1)
-    source("Scripts/downloadRiceTradeData.R")
-    Sys.sleep(1)
-    source("Scripts/downloadStocksData.R")
-    Sys.sleep(1)
-}
+source("Scripts/updateRiceData.R")
 
 
 
@@ -300,3 +281,5 @@ RicePrices <- bind_rows(
     suppressMessages() %>% suppressWarnings()
 
 rm(PricesFarmgate, PricesFarmgate_Old, PricesWholesale, PricesRetail, PricesRetail_Old)
+
+save.image("appData.RData")
