@@ -8,7 +8,7 @@ library(RcppRoll)
 # Download Rice Data ------------------------------------------------------
 ## Only run this section if the data in the Data/ folder are not updated.
 
-source("Scripts/updateRiceData.R")
+#source("Scripts/updateRiceData.R")
 
 
 
@@ -157,6 +157,17 @@ SUA_Quarterly <- left_join(
     select(Quarter, BeginningStock_MT, Palay_MT, Rice_MT, Imports_MT, GrossSupply_MT,
            Area_HA, Seeds_MT, Feeds_MT, Processing_MT, Exports_MT, EndingStock_MT, NetFood_MT) %>%
     filter(Quarter <= Sys.Date() - weeks(18)) %>%
+    suppressMessages() %>% suppressWarnings()
+
+SUA_Quarterly <- SUA_Quarterly %>%
+    left_join(read_csv("Data/Openstat-Population-Estimate.csv")) %>%
+    mutate(across(.cols = -Quarter, .fns = ~ roll_meanr(.x, 4), .names = "{.col}4Q")) %>%
+    suppressMessages() %>% suppressWarnings()
+
+SUA_Quarterly_PC <- SUA_Quarterly %>%
+    mutate(across(.cols = ends_with("MT"), .fns = ~ .x / Population_Est),
+           across(.cols = ends_with("MT4Q"), .fns = ~ .x / Population_Est4Q)) %>%
+    filter(Quarter >= as.Date("2000-01-01")) %>%
     suppressMessages() %>% suppressWarnings()
 
 
