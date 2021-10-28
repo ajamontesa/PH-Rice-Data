@@ -170,6 +170,8 @@ SUA_Quarterly_PC <- SUA_Quarterly %>%
     filter(Quarter >= as.Date("2000-01-01")) %>%
     suppressMessages() %>% suppressWarnings()
 
+PopulationEstimates <- read_csv("Data/Openstat-Population-Estimate.csv")
+
 
 
 # Rice Inflation and Prices -----------------------------------------------
