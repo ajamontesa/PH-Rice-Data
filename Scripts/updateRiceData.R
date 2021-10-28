@@ -39,6 +39,22 @@ if (agriProdDate > agriProdFile) {
 writeLines("Value of Production Data are up to date.")
 
 
+## Per Capita Data
+writeLines("Checking if Population Estimates are up to date.")
+populationDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__NA__QT__1SUM/?tablelist=true") %>%
+    html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl23_pnlPx"]/text()') %>%
+    html_text() %>% .[4] %>%
+    str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
+populationFile <- as.Date(file.mtime("Data/Openstat-Population-Estimate.csv"))
+
+if (populationDate > populationFile) {
+    writeLines("Updating Population Estimates.")
+    source("Scripts/downloadPopulationEstimates.R")
+    Sys.sleep(1)
+}
+writeLines("Value of Production Data are up to date.")
+
+
 
 # Monthly Rice Data -------------------------------------------------------
 ## Stock Inventory
