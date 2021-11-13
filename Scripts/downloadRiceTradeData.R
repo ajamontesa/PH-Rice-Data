@@ -43,7 +43,7 @@ importCodes <- tribble(
     "2018", str_c(str_flatten(str_c('"', 488:502, '", ')), '"503"'),
     "2019", str_c(str_flatten(str_c('"', 529:551, '", ')), '"552"'),
     "2020", str_c(str_flatten(str_c('"', 504:526, '", ')), '"527"'),
-    "2021", str_c(str_flatten(str_c('"', 459:481, '", ')), '"482"')
+    "2021", str_c(str_flatten(str_c('"', 492:514, '", ')), '"515"')
 ) %>% bind_cols(url = str_c("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2L/IMT/GKI/0022L4DMK",
                             str_c(rep(c("A", "B", "C", "D"), each = 10)[1:(2021-1990)],
                                   rep(0:9, 4)[1:(2021-1990)]), ".px")) %>%
@@ -110,7 +110,7 @@ exportCodes <- tribble(
     "2018", str_flatten('"342", "343", "344", "345"'),
     "2019", str_c(str_flatten(str_c('"', 340:344, '", ')), '"345"'),
     "2020", str_c(str_flatten(str_c('"', 325:330, '", ')), '"331"'),
-    "2021", str_c(str_flatten(str_c('"', 340:344, '", ')), '"345"'),
+    "2021", str_c(str_flatten(str_c('"', 415:419, '", ')), '"420"'),
 ) %>% bind_cols(url = str_c("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2L/IMT/GKE/0012L4DXK",
                             str_c(rep(c("A", "B", "C", "D"), each = 10)[1:(2021-1990)],
                                   rep(0:9, 4)[1:(2021-1990)]), ".px")) %>%
