@@ -86,7 +86,7 @@ pricesWSDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M_
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
-pricesWSFile <- as.Date(file.mtime("Data/Openstat-Prices-Wholesale-New.csv"))
+pricesWSFile <- as.Date(file.mtime("Data/Openstat-Prices-Wholesale.csv"))
 
 pricesRTDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__NRP/?tablelist=true") %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
