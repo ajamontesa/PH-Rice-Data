@@ -25,7 +25,7 @@ writeLines("Productivity Data are up to date.")
 
 ## Value of Production Data
 writeLines("Checking if Value of Production Data are up to date.")
-agriProdDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__AA__VP/?tablelist=true") %>%
+agriProdDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__AA__VP__NA/?tablelist=true") %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
