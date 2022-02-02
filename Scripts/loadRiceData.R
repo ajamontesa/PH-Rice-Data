@@ -221,6 +221,7 @@ PricesFarmgate_Old <- read_csv("Data/Openstat-Prices-Farmgate-Old.csv") %>%
 
 ## Wholesale Prices
 PricesWholesale_Raw <- read_csv("Data/Openstat-Prices-Wholesale.csv") %>%
+    rename(Geolocation = `Region Province`) %>%
     select(Geolocation, Commodity, everything(), -contains("Annual")) %>%
     mutate(across(.cols = -(1:2), .fns = as.double)) %>%
     pivot_longer(cols = -(1:2), names_to = "Month", values_to = "Pesos") %>%
@@ -239,15 +240,11 @@ PricesWholesale_Reg <- PricesWholesale_Raw %>%
     suppressMessages() %>% suppressWarnings()
 
 PricesWholesale_Phl <- PricesWholesale_Raw %>%
-    group_by(Commodity, Month) %>%
-    summarize(Pesos = mean(Pesos, na.rm = TRUE)) %>%
-    ungroup() %>%
-    mutate(Geolocation = "PHILIPPINES") %>%
-    left_join(GeoLabels) %>%
-    select(Geolocation, Geolevel, Region, Reg_Num, Province, Commodity, Month, Pesos) %>%
+    filter(Geolocation == "PHILIPPINES") %>%
     suppressMessages() %>% suppressWarnings()
 
-PricesWholesale <- bind_rows(PricesWholesale_Phl, PricesWholesale_Reg, PricesWholesale_Raw)
+PricesWholesale <- bind_rows(PricesWholesale_Phl, PricesWholesale_Reg,
+                             PricesWholesale_Raw %>% filter(Geolevel == "Province"))
 rm(PricesWholesale_Raw, PricesWholesale_Reg, PricesWholesale_Phl)
 
 
