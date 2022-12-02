@@ -28,7 +28,7 @@ AgriValue <- read_csv("Data/Openstat-Agriculture-Value-of-Production.csv") %>%
     mutate(Quarter = yq(Quarter)) %>%
     mutate(Subsector = if_else(Subsector == "CROP", "CROPS", Subsector),
            Level = case_when(str_starts(Subsector, "\\.\\.") ~ "Commodity",
-                             Subsector == "AGRICULTURE" ~ "Agriculture",
+                             Subsector == "AGRICULTURE AND FISHERIES" ~ "Agriculture",
                              TRUE ~ "Group"),
            Group = case_when(Level == "Group" ~ str_to_title(Subsector),
                              Level == "Agriculture" ~ "Agriculture",
@@ -178,7 +178,7 @@ PopulationEstimates <- read_csv("Data/Openstat-Population-Estimate.csv")
 writeLines("Loading Rice Inflation data into R.")
 
 ## Inflation
-RiceInflation_All <- read_csv("Data/Openstat-Rice-Inflation.csv") %>%
+RiceInflation_All <- read_csv("Data/Openstat-Rice-Inflation-2018.csv") %>%
     mutate(across(.cols = -(1:2), .fns = as.double)) %>%
     select(Geolocation, Commodity = `Commodity Description`, everything(), -contains("Ave")) %>%
     pivot_longer(cols = -(1:2), names_to = "Month", values_to = "CPI") %>%
@@ -196,9 +196,9 @@ RiceInflation_Small <- RiceInflation_All %>%
 writeLines("Loading Price data into R.")
 
 ## Farmgate Prices
-PricesFarmgate <- read_csv("Data/Openstat-Prices-Farmgate-New.csv") %>%
+PricesFarmgate_New <- read_csv("Data/Openstat-Prices-Farmgate-New.csv") %>%
     filter(str_detect(Commodity, "Other")) %>%
-    select(Geolocation = `Region/Province`, Commodity, everything(), -contains("Annual")) %>%
+    select(Geolocation, Commodity, everything(), -contains("Annual")) %>%
     mutate(across(.cols = -(1:2), .fns = as.double)) %>%
     pivot_longer(cols = -(1:2), names_to = "Month", values_to = "Pesos") %>%
     mutate(Commodity = str_replace(Commodity, "\\s\\[.+\\,", "\\,"),
@@ -220,9 +220,8 @@ PricesFarmgate_Old <- read_csv("Data/Openstat-Prices-Farmgate-Old.csv") %>%
 
 
 ## Wholesale Prices
-PricesWholesale_Raw <- read_csv("Data/Openstat-Prices-Wholesale.csv") %>%
-    rename(Geolocation = `Region Province`) %>%
-    select(Geolocation, Commodity, everything(), -contains("Annual")) %>%
+PricesWholesale_Raw <- read_csv("Data/Openstat-Prices-Wholesale-Old.csv") %>%
+    select(Geolocation = `Region Province`, Commodity, everything(), -contains("Annual")) %>%
     mutate(across(.cols = -(1:2), .fns = as.double)) %>%
     pivot_longer(cols = -(1:2), names_to = "Month", values_to = "Pesos") %>%
     mutate(Month = ym(str_sub(Month, 1, 8))) %>%
@@ -243,13 +242,36 @@ PricesWholesale_Phl <- PricesWholesale_Raw %>%
     filter(Geolocation == "PHILIPPINES") %>%
     suppressMessages() %>% suppressWarnings()
 
-PricesWholesale <- bind_rows(PricesWholesale_Phl, PricesWholesale_Reg,
-                             PricesWholesale_Raw %>% filter(Geolevel == "Province"))
+PricesWholesale_Old <- bind_rows(PricesWholesale_Phl, PricesWholesale_Reg, PricesWholesale_Raw %>% filter(Geolevel == "Province"))
+
 rm(PricesWholesale_Raw, PricesWholesale_Reg, PricesWholesale_Phl)
 
 
+PricesWholesale_New <- read_csv("Data/Openstat-Prices-Wholesale-New.csv") %>%
+    select(Geolocation, Commodity, everything(), -contains("Annual")) %>%
+    mutate(across(.cols = -(1:2), .fns = as.double)) %>%
+    pivot_longer(cols = -(1:2), names_to = "Month", values_to = "Pesos") %>%
+    mutate(Month = ym(str_sub(Month, 1, 8))) %>%
+    left_join(GeoLabels) %>%
+    select(Geolocation, Geolevel, Region, Reg_Num, Province, Commodity, Month, Pesos) %>%
+    suppressMessages() %>% suppressWarnings()
+
+
 ## Retail Prices
-PricesRetail <- read_csv("Data/Openstat-Prices-Retail-New.csv") %>%
+PricesRetail_New2018 <- read_csv("Data/Openstat-Prices-Retail-New-2018.csv") %>%
+    select(Geolocation, Commodity, everything(), -contains("Annual")) %>%
+    mutate(across(.cols = -(1:2), .fns = as.double)) %>%
+    pivot_longer(cols = -(1:2), names_to = "Month", values_to = "Pesos") %>%
+    mutate(Month = ym(str_sub(Month, 1, 8))) %>%
+    left_join(GeoLabels) %>%
+    select(Geolocation, Geolevel, Region, Reg_Num, Province, Commodity, Month, Pesos) %>%
+    mutate(Commodity = case_when(str_detect(Commodity, "REGULAR") ~ "Regular Milled Rice (RMR)",
+                                 str_detect(Commodity, "WELL") ~ "Well Milled Rice (WMR)",
+                                 str_detect(Commodity, "SPECIAL") ~ "Rice Special",
+                                 TRUE ~ Commodity)) %>%
+    suppressMessages() %>% suppressWarnings()
+
+PricesRetail_New2012 <- read_csv("Data/Openstat-Prices-Retail-New-2012.csv") %>%
     select(Geolocation = `Region/Province`, Commodity, everything(), -contains("Annual")) %>%
     mutate(across(.cols = -(1:2), .fns = as.double)) %>%
     pivot_longer(cols = -(1:2), names_to = "Month", values_to = "Pesos") %>%
@@ -276,12 +298,17 @@ PricesRetail_Old <- read_csv("Data/Openstat-Prices-Retail-Old.csv") %>%
 RicePrices <- bind_rows(
     # Farmgate Prices
     bind_rows(filter(PricesFarmgate_Old, year(Month) < 2010),
-              PricesFarmgate) %>% mutate(Type = "Farmgate"),
+              filter(PricesFarmgate_New, year(Month) >= 2010)) %>%
+        mutate(Type = "Farmgate"),
     # Wholesale Prices
-    PricesWholesale %>% mutate(Type = "Wholesale"),
+    bind_rows(filter(PricesWholesale_Old, year(Month) < 2010),
+              filter(PricesWholesale_New, year(Month) >= 2010)) %>%
+        mutate(Type = "Wholesale"),
     # Retail Prices
     bind_rows(filter(PricesRetail_Old, year(Month) < 2012),
-              PricesRetail) %>% mutate(Type = "Retail")
+              filter(PricesRetail_New2012, year(Month) >= 2012 & year(Month) < 2018),
+              filter(PricesRetail_New2018, year(Month) >= 2018)) %>%
+        mutate(Type = "Retail")
 ) %>%
     mutate(Geolevel = factor(Geolevel, levels = c("Country", "Region", "Province")),
            Region = factor(Region, reglabs),
@@ -290,6 +317,6 @@ RicePrices <- bind_rows(
            Type = factor(Type, levels = c("Farmgate", "Wholesale", "Retail"))) %>%
     suppressMessages() %>% suppressWarnings()
 
-rm(PricesFarmgate, PricesFarmgate_Old, PricesWholesale, PricesRetail, PricesRetail_Old)
+rm(PricesFarmgate_New, PricesFarmgate_Old, PricesWholesale_Old, PricesWholesale_New, PricesRetail_New2018, PricesRetail_New2012, PricesRetail_Old)
 
 save.image("appData.RData")

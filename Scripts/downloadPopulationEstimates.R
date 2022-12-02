@@ -6,6 +6,9 @@ library(stringr)
 library(lubridate)
 
 
+# Set ssl_verifypper=0 since OpenStat's SSL Certificate is problematic
+set_config(config(ssl_verifypeer=0))
+
 # Openstat National Accounts ----------------------------------------------
 
 full_join(

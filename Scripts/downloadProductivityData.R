@@ -3,6 +3,9 @@ library(readr)
 library(dplyr)
 
 
+# Set ssl_verifypper=0 since OpenStat's SSL Certificate is problematic
+set_config(config(ssl_verifypeer=0))
+
 # Openstat Volume of Production -------------------------------------------
 writeLines("Downloading Volume of Production data from the Openstat API.")
 

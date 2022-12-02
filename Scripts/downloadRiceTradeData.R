@@ -4,6 +4,8 @@ library(dplyr)
 library(stringr)
 library(tidyr)
 
+# Set ssl_verifypper=0 since OpenStat's SSL Certificate is problematic
+set_config(config(ssl_verifypeer=0))
 
 
 # Openstat Rice Imports ---------------------------------------------------
@@ -11,6 +13,9 @@ writeLines("Downloading Rice Imports data from the Openstat API.")
 
 ## Generate Codes for URL and Body of POST() request
 ### Note: The latest data need to be updated monthly
+
+current_year <- 2022
+
 importCodes <- tribble(
     ~yr, ~code,
     "1991", '"176"',
@@ -43,16 +48,17 @@ importCodes <- tribble(
     "2018", str_c(str_flatten(str_c('"', 488:502, '", ')), '"503"'),
     "2019", str_c(str_flatten(str_c('"', 529:551, '", ')), '"552"'),
     "2020", str_c(str_flatten(str_c('"', 504:526, '", ')), '"527"'),
-    "2021", str_c(str_flatten(str_c('"', 534:556, '", ')), '"557"')
+    "2021", str_c(str_flatten(str_c('"', 532:554, '", ')), '"555"'),
+    "2022", str_c(str_flatten(str_c('"', 487:505, '", ')), '"506"')
 ) %>% bind_cols(url = str_c("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2L/IMT/GKI/0022L4DMK",
-                            str_c(rep(c("A", "B", "C", "D"), each = 10)[1:(2021-1990)],
-                                  rep(0:9, 4)[1:(2021-1990)]), ".px")) %>%
+                            str_c(rep(c("A", "B", "C", "D"), each = 10)[1:(current_year-1990)],
+                                  rep(0:9, 4)[1:(current_year-1990)]), ".px")) %>%
     mutate(code = str_c('{"query": [{"code": "Commodity Code", "selection": {"filter": "item", "values": [',
                         code, ']}}], "response": {"format": "csv"}}'))
 
 ## Generate Rice Imports Dataset and write as csv file
 RiceImports <- tibble()
-for (y in 1:(2021-1990)) {
+for (y in 1:(current_year-1990)) {
     RiceImports <- bind_rows(
         RiceImports,
         POST(url = as.character(importCodes[y, 3]),
@@ -78,6 +84,9 @@ writeLines("Downloading Rice Exports data from the Openstat API.")
 
 ## Generate Codes for URL and Body of POST() request
 ### Note: The latest data need to be updated monthly
+
+current_year <- 2022
+
 exportCodes <- tribble(
     ~yr, ~code,
     "1991", str_flatten('"160", "161"'),
@@ -110,16 +119,17 @@ exportCodes <- tribble(
     "2018", str_flatten('"342", "343", "344", "345"'),
     "2019", str_c(str_flatten(str_c('"', 340:344, '", ')), '"345"'),
     "2020", str_c(str_flatten(str_c('"', 325:330, '", ')), '"331"'),
-    "2021", str_c(str_flatten(str_c('"', 460:467, '", ')), '"468"'),
+    "2021", str_c(str_flatten(str_c('"', 440:447, '", ')), '"448"'),
+    "2022", str_c(str_flatten(str_c('"', 325:330, '", ')), '"331"')
 ) %>% bind_cols(url = str_c("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2L/IMT/GKE/0012L4DXK",
-                            str_c(rep(c("A", "B", "C", "D"), each = 10)[1:(2021-1990)],
-                                  rep(0:9, 4)[1:(2021-1990)]), ".px")) %>%
+                            str_c(rep(c("A", "B", "C", "D"), each = 10)[1:(current_year-1990)],
+                                  rep(0:9, 4)[1:(current_year-1990)]), ".px")) %>%
     mutate(code = str_c('{"query": [{"code": "Commodity Code", "selection": {"filter": "item", "values": [',
                         code, ']}}], "response": {"format": "csv"}}'))
 
 ## Generate Rice Exports Dataset and write as csv file
 RiceExports <- tibble()
-for (y in c(1:3, 7:(2021-1990))) {
+for (y in c(1:3, 7:(current_year-1990))) {
     RiceExports <- bind_rows(
         RiceExports,
         POST(url = as.character(exportCodes[y, 3]),
@@ -138,4 +148,4 @@ for (y in c(1:3, 7:(2021-1990))) {
 
 RiceExports %>% write_csv("Data/Openstat-Rice-Exports.csv")
 
-rm(importCodes, exportCodes, RiceImports, RiceExports, y)
+rm(importCodes, exportCodes, RiceImports, RiceExports, current_year, y)

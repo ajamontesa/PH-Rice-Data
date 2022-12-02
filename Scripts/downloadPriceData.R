@@ -4,6 +4,8 @@ library(dplyr)
 library(stringr)
 
 
+# Set ssl_verifypper=0 since OpenStat's SSL Certificate is problematic
+set_config(config(ssl_verifypeer=0))
 
 # Openstat Monthly Farmgate Prices ----------------------------------------
 writeLines("Downloading Monthly Farmgate Price data from the Openstat API.")
@@ -29,10 +31,11 @@ POST("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2M/NFG/0032M4AFN01.px",
 # Openstat Monthly Wholesale Prices ---------------------------------------
 writeLines("Downloading Monthly Wholesale Price data from the Openstat API.")
 
-WSPrices <- tibble()
+# Old Series
+WSPricesOld <- tibble()
 for (i in 0:3) {
-    WSPrices <- bind_rows(
-        WSPrices,
+    WSPricesOld <- bind_rows(
+        WSPricesOld,
         POST(url = "https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2M/WS/0052M4AWP01.px",
              body = as.character(str_c('{"query": [{"code": "Commodity", "selection": {"filter": "item", "values": ["',
                                        i, '"]}}], "response": {"format": "csv"}}'))) %>%
@@ -41,9 +44,24 @@ for (i in 0:3) {
     )
     Sys.sleep(0.5)
 }
-WSPrices %>% write_csv("Data/Openstat-Prices-Wholesale.csv")
+WSPricesOld %>% write_csv("Data/Openstat-Prices-Wholesale-Old.csv")
 
-rm(WSPrices, i)
+# New Series
+WSPricesNew <- tibble()
+for (i in 0:3) {
+    WSPricesNew <- bind_rows(
+        WSPricesNew,
+        POST(url = "https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2M/NWS/0052M4AWA01.px",
+             body = as.character(str_c('{"query": [{"code": "Commodity", "selection": {"filter": "item", "values": ["',
+                                       i, '"]}}], "response": {"format": "csv"}}'))) %>%
+            content(encoding = "UTF-8") %>%
+            suppressMessages() %>% suppressWarnings()
+    )
+    Sys.sleep(0.5)
+}
+WSPricesNew %>% write_csv("Data/Openstat-Prices-Wholesale-New.csv")
+
+rm(WSPricesOld, WSPricesNew, i)
 
 
 
@@ -67,10 +85,21 @@ RetailOldPrices %>% write_csv("Data/Openstat-Prices-Retail-Old.csv")
 
 rm(RetailOldPrices, i)
 
-## New Series
+
+## New Series 2012-based
 POST("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2M/NRP/0042M4ARN01.px",
      body = '{"query": [{"code": "Commodity", "selection": {"filter": "item", "values": ["0", "1", "2"]}}],
              "response": {"format": "csv"}}') %>%
     content(encoding = "UTF-8") %>%
-    write_csv("Data/Openstat-Prices-Retail-New.csv") %>%
+    write_csv("Data/Openstat-Prices-Retail-New-2012.csv") %>%
     suppressMessages() %>% suppressWarnings()
+
+
+## New Series 2018-based
+POST("https://openstat.psa.gov.ph/PXWeb/api/v1/en/DB/2M/2018/0042M4ARA01.px",
+     body = '{"query": [{"code": "Commodity", "selection": {"filter": "item", "values": ["0", "1", "2"]}}],
+             "response": {"format": "csv"}}') %>%
+    content(encoding = "UTF-8") %>%
+    write_csv("Data/Openstat-Prices-Retail-New-2018.csv") %>%
+    suppressMessages() %>% suppressWarnings()
+
