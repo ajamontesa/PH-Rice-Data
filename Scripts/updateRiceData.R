@@ -5,14 +5,17 @@ library(stringr)
 library(lubridate)
 
 
+# Set ssl_verifypper=0 since OpenStat's SSL Certificate is problematic
+set_config(config(ssl_verifypeer=0))
 
 # Quarterly Rice Data -----------------------------------------------------
 ## Productivity Data
 writeLines("Checking if Productivity Data are up to date.")
-palayProdDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2E__CS/?tablelist=true&rxid=bdf9d8da-96f1-4100-ae09-18cb3eaeb313") %>%
+palayProdDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2E__CS/?tablelist=true&rxid=bdf9d8da-96f1-4100-ae09-18cb3eaeb313")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
+
 palayProdFile <- as.Date(file.mtime("Data/Openstat-Palay-Volume-of-Production.csv"))
 
 if (palayProdDate > palayProdFile) {
@@ -25,10 +28,11 @@ writeLines("Productivity Data are up to date.")
 
 ## Value of Production Data
 writeLines("Checking if Value of Production Data are up to date.")
-agriProdDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__AA__VP__NA/?tablelist=true") %>%
+agriProdDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__AA__VP__NA/?tablelist=true")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
+
 agriProdFile <- as.Date(file.mtime("Data/Openstat-Agriculture-Value-of-Production.csv"))
 
 if (agriProdDate > agriProdFile) {
@@ -41,10 +45,11 @@ writeLines("Value of Production Data are up to date.")
 
 ## Per Capita Data
 writeLines("Checking if Population Estimates are up to date.")
-populationDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__NA__QT__1SUM/?tablelist=true") %>%
+populationDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2B__NA__QT__1SUM/?tablelist=true")) %>%
     html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl23_pnlPx"]/text()') %>%
     html_text() %>% .[4] %>%
     str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
+
 populationFile <- as.Date(file.mtime("Data/Openstat-Population-Estimate.csv"))
 
 if (populationDate > populationFile) {
@@ -59,7 +64,7 @@ writeLines("Value of Production Data are up to date.")
 # Monthly Rice Data -------------------------------------------------------
 ## Stock Inventory
 writeLines("Checking if Stocks Data are up to date.")
-stocksDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2E__CS/?tablelist=true&rxid=bdf9d8da-96f1-4100-ae09-18cb3eaeb313") %>%
+stocksDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2E__CS/?tablelist=true&rxid=bdf9d8da-96f1-4100-ae09-18cb3eaeb313")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl05_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
@@ -76,25 +81,28 @@ writeLines("Stocks Data are up to date.")
 
 ## Prices Data
 writeLines("Checking if Price Data are up to date.")
-pricesFMDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__NFG/?tablelist=true") %>%
+pricesFMDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__NFG/?tablelist=true")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
+
 pricesFMFile <- as.Date(file.mtime("Data/Openstat-Prices-Farmgate-New.csv"))
 
-pricesWSDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__WS/?tablelist=true") %>%
+pricesWSDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__NWS/?tablelist=true")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
-pricesWSFile <- as.Date(file.mtime("Data/Openstat-Prices-Wholesale.csv"))
 
-pricesRTDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__NRP/?tablelist=true") %>%
+pricesWSFile <- as.Date(file.mtime("Data/Openstat-Prices-Wholesale-New.csv"))
+
+pricesRTDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__2018/?tablelist=true")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
-pricesRTFile <- as.Date(file.mtime("Data/Openstat-Prices-Retail-New.csv"))
 
-if ((pricesFMDate > pricesFMFile) & (pricesWSDate > pricesWSFile) & (pricesRTDate > pricesRTFile)) {
+pricesRTFile <- as.Date(file.mtime("Data/Openstat-Prices-Retail-New-2018.csv"))
+
+if ((pricesFMDate > pricesFMFile) | (pricesWSDate > pricesWSFile) | (pricesRTDate > pricesRTFile)) {
 	writeLines("Updating Prices Data.")
 	source("Scripts/downloadPriceData.R")
 	Sys.sleep(1)
@@ -104,12 +112,12 @@ writeLines("Price Data are up to date.")
 
 ## Inflation Data
 writeLines("Checking if Inflation Data are up to date.")
-inflationDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__PI__CPI/?tablelist=true") %>%
+inflationDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2M__PI__CPI__2018/?tablelist=true")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl01_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
 
-inflationFile <- as.Date(file.mtime("Data/Openstat-Rice-Inflation.csv"))
+inflationFile <- as.Date(file.mtime("Data/Openstat-Rice-Inflation-2018.csv"))
 
 if (inflationDate > inflationFile) {
 	writeLines("Updating Inflation Data.")
@@ -121,7 +129,7 @@ writeLines("Inflation Data are up to date.")
 
 ## Trade Data
 writeLines("Checking if Imports and Exports Data are up to date.")
-tradeDate <- read_html("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2L__IMT__GKI/?tablelist=true&rxid=bdf9d8da-96f1-4100-ae09-18cb3eaeb313") %>%
+tradeDate <- read_html(GET("https://openstat.psa.gov.ph/PXWeb/pxweb/en/DB/DB__2L__IMT__GKI/?tablelist=true&rxid=bdf9d8da-96f1-4100-ae09-18cb3eaeb313")) %>%
 	html_elements(xpath = '//*[@id="ctl00_ContentPlaceHolderMain_TableList1_TableList1_LinkItemList_ctl61_pnlPx"]/text()') %>%
 	html_text() %>% .[4] %>%
 	str_extract("Updated:\\s+\\d+/\\d+/\\d+") %>% str_extract("\\d.+\\d") %>% mdy()
